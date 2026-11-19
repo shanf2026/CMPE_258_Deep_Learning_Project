@@ -15,7 +15,6 @@ debug.sh.docker.sh
 docker_cachecleanrl_utils/charts_episode_reward
 tutorials
 .DS_Store
-*.tfevents.*
 wandb
 openaigym.*
 benchmark/**/*.svg
