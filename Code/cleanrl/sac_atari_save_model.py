@@ -339,5 +339,8 @@ if __name__ == "__main__":
                 if args.autotune:
                     writer.add_scalar("losses/alpha_loss", alpha_loss.item(), global_step)
 
+    torch.save(agent.state_dict(), f"runs/{run_name}/ppo_atari.pt")
+    print(f"Saved model weights to runs/{run_name}/ppo_atari.pt")
+    
     envs.close()
     writer.close()
