@@ -267,7 +267,7 @@ if __name__ == "__main__":
             repo_id = f"{args.hf_entity}/{repo_name}" if args.hf_entity else repo_name
             push_to_hub(args, episodic_returns, repo_id, "DQN", f"runs/{run_name}", f"videos/{run_name}-eval")
 
-    torch.save(agent.state_dict(), f"runs/{run_name}/ppo_atari.pt")
+    torch.save(q_network.state_dict(), f"runs/{run_name}/ppo_atari.pt")
     print(f"Saved model weights to runs/{run_name}/ppo_atari.pt")
     
     envs.close()
