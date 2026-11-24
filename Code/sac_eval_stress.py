@@ -117,7 +117,9 @@ if __name__ == "__main__":
 
     while len(returns) < args.episodes:
         with torch.no_grad():
-            action, _, _, _ = actor.get_action_and_value(torch.Tensor(obs).to(device))
+            action, _, _, _ = actor.get_action(
+                torch.as_tensor(obs, device=device).float()
+            )
         obs, _, _, _, infos = envs.step(action.cpu().numpy())
 
         if "final_info" in infos:
