@@ -340,7 +340,7 @@ if __name__ == "__main__":
                     writer.add_scalar("losses/q_values", old_val.mean().item(), global_step)
                     elapsed_steps = global_step - start_step
                     sps = elapsed_steps / (time.time() - start_time)
-                    seconds = args.total_timesteps
+                    seconds = (args.total_timesteps - global_step) / max(sps, 1)
                     print("SPS:", int(sps), "ETA:", timedelta(seconds=int(seconds)))
                     writer.add_scalar("charts/SPS", int(elapsed_steps / (time.time() - start_time)), global_step)
 
