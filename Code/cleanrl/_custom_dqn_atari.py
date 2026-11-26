@@ -7,6 +7,7 @@ from collections import deque
 import copy
 import signal
 import sys
+from datetime import timedelta
 
 import pickle
 import gymnasium as gym
@@ -267,6 +268,7 @@ if __name__ == "__main__":
         handle_timeout_termination=False,
     )
     start_time = time.time()
+    start_perf_counter = time.perf_counter()
 
     # custom section for resuming from an existing checkpoint
     os.makedirs(args.checkpoint_dir, exist_ok=True)
@@ -336,8 +338,11 @@ if __name__ == "__main__":
                 if global_step % 100 == 0:
                     writer.add_scalar("losses/td_loss", loss, global_step)
                     writer.add_scalar("losses/q_values", old_val.mean().item(), global_step)
-                    print("SPS:", int(global_step / (time.time() - start_time)))
-                    writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
+                    elapsed_steps = global_step - start_step
+                    sps = elapsed_steps / (time.time() - start_time)
+                    seconds = args.total_timesteps
+                    print("SPS:", int(sps), "ETA:", timedelta(seconds=int(seconds)))
+                    writer.add_scalar("charts/SPS", int(elapsed_steps / (time.time() - start_time)), global_step)
 
                 # optimize the model
                 optimizer.zero_grad()
@@ -359,7 +364,12 @@ if __name__ == "__main__":
         # SAVING IN-PROGRESS STUFF FOR RESUMING LATER
         if global_step > args.learning_starts and (abort_flag or global_step % args.save_freq == 0):
             print("!!!!!!!! CHECKPOINT SAVING IN PROGRESS DO NOT TERMINATE !!!!!!!!!")
-            ckpt_path = os.path.join(args.checkpoint_dir, f"{run_name}_latest.pt")
+            start_perf_counter2 = time.perf_counter()
+            run_name2 = run_name
+            # TEMPORARY HALFWAY CHECKPOINT DELETE LATER
+            if global_step == 5000000:
+                run_name2 = run_name + "HALFWAY"
+            ckpt_path = os.path.join(args.checkpoint_dir, f"{run_name2}_latest.pt")
             torch.save(
                 {
                     "global_step": global_step,
@@ -375,10 +385,16 @@ if __name__ == "__main__":
             print(f"Saved checkpoint at step {global_step} -> {ckpt_path}")
             print(">>>>>>>>> SAVING COMPLETE <<<<<<<<")
 
+            elapsed_perf_counter2 = time.perf_counter() - start_perf_counter2
+            print(f"Checkpoint Saving Time: {timedelta(seconds=int(elapsed_perf_counter2))}")
+
+
             if abort_flag:
                 print("Terminating early due to SIGINT")
                 envs.close()
                 writer.close()
+                elapsed_perf_counter = time.perf_counter() - start_perf_counter
+                print(f"Elapsed Time: {timedelta(seconds=int(elapsed_perf_counter))}")
                 sys.exit(0)
 
     if args.save_model:
@@ -415,3 +431,5 @@ if __name__ == "__main__":
 
     envs.close()
     writer.close()
+    elapsed_perf_counter = time.perf_counter() - start_perf_counter
+    print(f"Elapsed Time: {timedelta(seconds=int(elapsed_perf_counter))}")
