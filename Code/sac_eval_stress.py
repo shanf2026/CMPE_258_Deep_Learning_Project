@@ -98,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument("--delay", type=int, default=0, help="Action delay in decision steps (1 step = 4 frames)")
     parser.add_argument("--drop-prob", type=float, default=0.0, help="Probability of freezing/dropping a frame (0.0 to 1.0)")
     parser.add_argument("--capture-video", action="store_true")
-    parser.add_argument("--csv-out", type=str, default="ppo_stress_results.csv")
+    parser.add_argument("--csv-out", type=str, default="sac_stress_results.csv")
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
